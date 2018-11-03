@@ -1,0 +1,15 @@
+﻿orders.api:
+    image: orders.api       
+    build:
+      context: ./orders-service/
+      dockerfile: Dockerfile
+    ports: 
+    - "8081:80"
+    volumes: 
+      - ./orders-service/bin/pub/:/app
+    container_name: orders.api
+rabbitmq:
+  image: rabbitmq:3-management
+  ports:
+    - "15672:15672"
+  container_name: rabbitmq

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>OrdersService.MessageReceiver</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0-preview3-35497" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.0.0-pre3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\orders-service-core\OrdersService.Core.csproj" />
+    <ProjectReference Include="..\orders-service-infrastructure\OrdersService.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
