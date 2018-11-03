@@ -46,21 +46,7 @@ namespace OrdersService.Tests.IntegrationTests
             //Assert
             actual.Should().BeEquivalentTo(expected);
         }
-
-        [Fact]
-        public async Task SaveNewOrder()
-        {
-            //Arrange
-            var order = _orderBuilder.WithDefaultValues();
-            
-            //Act
-            var actual = await _sut.Create(order.Reference, order.UserId, order.Items);
-            
-            //Assert
-            var expected = await _ordersRepository.LoadById(actual.Id);
-            actual.Should().BeEquivalentTo(expected);
-        }
-
+        
         [Fact]
         public async Task SubmitOrder()
         {
@@ -127,8 +113,8 @@ namespace OrdersService.Tests.IntegrationTests
         public async Task ListOrdersByUser()
         {
             //Arrange
-            var order1 = await _ordersRepository.SaveAsync(_orderBuilder.WithDefaultValues());
-            var order2 = await _ordersRepository.SaveAsync(_orderBuilder.WithDefaultValues());
+            var order1 = await _ordersRepository.SaveAsync(_orderBuilder.WithUserId("testByUserId"));
+            var order2 = await _ordersRepository.SaveAsync(_orderBuilder.WithUserId("testByUserId"));
             var list = new List<Order>() { order1, order2 };
             
             //Act

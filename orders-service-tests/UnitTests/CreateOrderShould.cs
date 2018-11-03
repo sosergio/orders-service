@@ -15,7 +15,7 @@ namespace OrdersService.Tests.UnitTests
     public class CreateOrderShould
     {
         IRepository<Order> _ordersRepository;
-        IMessageBusProvider _queue;
+        IMessageBusProvider _messageProvider;
         IOrdersService _sut;
         ITimeProvider _timeProvider;
         IFixture _fixture;
@@ -24,26 +24,11 @@ namespace OrdersService.Tests.UnitTests
         public CreateOrderShould()
         {
             _ordersRepository = Substitute.For<IRepository<Order>>();
-            _queue = Substitute.For<IMessageBusProvider>();
+            _messageProvider = Substitute.For<IMessageBusProvider>();
             _timeProvider = Substitute.For<ITimeProvider>();
-            _sut = new OrdersService.Core.OrdersService(_ordersRepository, _queue, _timeProvider);
+            _sut = new OrdersService.Core.OrdersService(_ordersRepository, _messageProvider, _timeProvider);
             _fixture = new Fixture().Customize(new AutoNSubstituteCustomization());
             _orderBuilder = new OrderBuilder();
-        }
-
-        [Fact]
-        public async Task InitAndSaveInRepository()
-        {
-            //Arrange
-            var order = _orderBuilder.WithDefaultValues();
-            var expected = _orderBuilder.WithRandomId();
-            _ordersRepository.SaveAsync(Arg.Any<Order>()).Returns(expected);
-            
-            //Act
-            var result = await _sut.Create(order.Reference, order.UserId, order.Items);
-
-            //Assert
-            result.Should().BeEquivalentTo(expected);
         }
 
         [Theory]

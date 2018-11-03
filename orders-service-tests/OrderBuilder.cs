@@ -36,5 +36,12 @@ namespace OrdersService.Tests
             order.Id = id;
             return order;
         }
+
+        public Order WithUserId(string v)
+        {
+            var order = WithDefaultValues();
+            order.UserId = v;
+            return order;
+        }
     }
 }

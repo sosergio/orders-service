@@ -24,7 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\orders-service-api-client\OrdersService.ApiClient.csproj" />
     <ProjectReference Include="..\orders-service-infrastructure\OrdersService.Infrastructure.csproj" />
-    <ProjectReference Include="..\orders-service\OrdersService.WebApi.csproj" />
+    <ProjectReference Include="..\orders-service-web-api\OrdersService.WebApi.csproj" />
   </ItemGroup>
 
 </Project>
