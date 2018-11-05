@@ -12,7 +12,7 @@ namespace OrdersService.Infrastructure.Providers
 {
     public class InMemoryDbProvider : IDbProvider
     {
-        private static Dictionary<string, List<IDbEntity>> _db { get; set; } = new Dictionary<string, List<IDbEntity>>();
+        private Dictionary<string, List<IDbEntity>> _db { get; set; } = new Dictionary<string, List<IDbEntity>>();
 
         public InMemoryDbProvider(DbConfig dbConfig)
         {}

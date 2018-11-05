@@ -116,8 +116,7 @@ namespace OrdersService.Tests.IntegrationTests
         {
             //Arrange
             var order1 = await _ordersRepository.SaveAsync(_orderBuilder.WithRandomId().WithUserId("testByUserId").Build());
-            var order2 = await _ordersRepository.SaveAsync(_orderBuilder.WithRandomId().WithUserId("testByUserId").Build());
-            var list = new List<Order>() { order1, order2 };
+            var list = new List<Order>() { order1 };
             
             //Act
             var actual = await _sut.ListByUser(order1.UserId);
