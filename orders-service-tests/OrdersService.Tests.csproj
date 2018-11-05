@@ -28,4 +28,8 @@
     <ProjectReference Include="..\orders-service-web-api\OrdersService.WebApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>

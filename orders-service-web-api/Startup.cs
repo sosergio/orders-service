@@ -37,11 +37,12 @@ namespace OrdersService.Api
         public void ConfigureServices(IServiceCollection services)
         {
             var envVars = Environment.GetEnvironmentVariables();
-            services.AddSingleton(new DbConfig() 
-            { 
+            var dbConfig = new DbConfig()
+            {
                 ConnectionString = ReadString(envVars, "ConnectionString"),
                 DatabaseName = ReadString(envVars, "DatabaseName")
-            });
+            };
+            services.AddSingleton(dbConfig);
             services.AddSingleton(new MessagingConfig()
             {
                 HostName = ReadString(envVars, "MessageBusConnection"),
@@ -55,7 +56,14 @@ namespace OrdersService.Api
             services.AddSingleton(BuildMapper());
             services.AddTransient<IRepository<Core.Models.Order>, OrdersRepository>();
             services.AddTransient<IOrdersService, Core.OrdersService>();
-            services.AddTransient<IDbProvider, MongoDbProvider>();
+            //if (dbConfig.DatabaseName == "fake")
+            //{
+            //    services.AddTransient<IDbProvider, InMemoryDbProvider>();
+            //}
+            //else
+            //{
+                services.AddTransient<IDbProvider, MongoDbProvider>();
+            //}
             services.AddTransient<IMessageBusProvider, RabbitMqProvider>();
             services.AddTransient<ITimeProvider, UtcTimeProvider>();
             services.AddTransient<IOrdersMessageBus, OrdersMessageBus>();
