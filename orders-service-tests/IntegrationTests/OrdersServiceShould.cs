@@ -8,7 +8,6 @@ using OrdersService.Core.Models;
 using OrdersService.Core.Services;
 using OrdersService.Infrastructure.Providers;
 using OrdersService.Infrastructure.Repositories;
-using OrdersService.Infrastructure.Providers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,7 +39,7 @@ namespace OrdersService.Tests.IntegrationTests
         public async Task GetExistingOrder()
         {
             //Arrange
-            var expected = _orderBuilder.WithDefaultValues();
+            var expected = _orderBuilder.Build();
             expected = await _ordersRepository.SaveAsync(expected);
             
             //Act
@@ -54,7 +53,7 @@ namespace OrdersService.Tests.IntegrationTests
         public async Task SubmitOrder()
         {
             //Arrange
-            var order = _orderBuilder.WithDefaultValues();
+            var order = _orderBuilder.Build();
             order = await _ordersRepository.SaveAsync(order);
             order.Submit();
 
@@ -69,7 +68,7 @@ namespace OrdersService.Tests.IntegrationTests
         public async Task CancelOrder()
         {
             //Arrange
-            var order = _orderBuilder.WithDefaultValues();
+            var order = _orderBuilder.Build();
             order = await _ordersRepository.SaveAsync(order);
             order.Cancel();
 
@@ -84,7 +83,7 @@ namespace OrdersService.Tests.IntegrationTests
         public async Task AddItemToOrder()
         {
             //Arrange
-            var order = _orderBuilder.WithDefaultValues();
+            var order = _orderBuilder.WithRandomId().Build();
             order = await _ordersRepository.SaveAsync(order);
             var item = _fixture.Create<OrderItem>();
             order.AddItem(item);
@@ -100,7 +99,7 @@ namespace OrdersService.Tests.IntegrationTests
         public async Task RemoveItemFromOrder()
         {
             //Arrange
-            var order = _orderBuilder.WithDefaultValues();
+            var order = _orderBuilder.WithRandomId().Build();
             order = await _ordersRepository.SaveAsync(order);
             var itemId = order.Items.First().ItemId;
             order.RemoveItem(itemId);
@@ -116,8 +115,8 @@ namespace OrdersService.Tests.IntegrationTests
         public async Task ListOrdersByUser()
         {
             //Arrange
-            var order1 = await _ordersRepository.SaveAsync(_orderBuilder.WithUserId("testByUserId"));
-            var order2 = await _ordersRepository.SaveAsync(_orderBuilder.WithUserId("testByUserId"));
+            var order1 = await _ordersRepository.SaveAsync(_orderBuilder.WithRandomId().WithUserId("testByUserId").Build());
+            var order2 = await _ordersRepository.SaveAsync(_orderBuilder.WithRandomId().WithUserId("testByUserId").Build());
             var list = new List<Order>() { order1, order2 };
             
             //Act

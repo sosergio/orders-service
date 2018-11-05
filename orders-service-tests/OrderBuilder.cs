@@ -11,37 +11,42 @@ namespace OrdersService.Tests
     {
         IFixture _fixture;
         DateTimeOffset firstOfJan = new DateTimeOffset(new DateTime(2018, 01, 01));
-        
+        Order _order { get; set; }
         public OrderBuilder()
         {
             _fixture = new Fixture().Customize(new AutoNSubstituteCustomization());
+            WithDefaultValues();
         }
 
-        public Order WithDefaultValues()
+        public OrderBuilder WithDefaultValues()
         {
             var refId = "ref-id";
             var userId = "user-id";
             var items = _fixture.Create<List<OrderItem>>();
-            return new Order(refId, userId, firstOfJan, items);
+            _order = new Order(refId, userId, firstOfJan, items);
+            return this;
         }
 
-        public Order WithRandomId()
+        public OrderBuilder WithRandomId()
         {
             return WithGivenId(Guid.NewGuid().ToString());
         }
 
-        public Order WithGivenId(string id)
+        public OrderBuilder WithGivenId(string id)
         {
-            var order = WithDefaultValues();
-            order.Id = id;
-            return order;
+            _order.Id = id;
+            return this;
         }
 
-        public Order WithUserId(string v)
+        public OrderBuilder WithUserId(string v)
         {
-            var order = WithDefaultValues();
-            order.UserId = v;
-            return order;
+            _order.UserId = v;
+            return this;
+        }
+
+        public Order Build()
+        {
+            return _order;
         }
     }
 }

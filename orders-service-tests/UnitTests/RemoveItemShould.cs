@@ -38,7 +38,7 @@ namespace OrdersService.Tests.UnitTests
         public async Task RemoveAndSaveInRepository()
         {
             //Arrange
-            var order = _orderBuilder.WithRandomId();
+            var order = _orderBuilder.WithRandomId().Build();
             _timeProvider.Now().Returns(order.Date);
             _ordersRepository.LoadById(order.Id).Returns(order);
             var expected = order;
@@ -58,7 +58,7 @@ namespace OrdersService.Tests.UnitTests
         [InlineData(" ", typeof(NotFoundError))]
         public async Task Throws_WhenItemIsInvalid(string s, Type excType)
         {
-            var order = _orderBuilder.WithRandomId();
+            var order = _orderBuilder.WithRandomId().Build();
             try
             {
                 await _sut.RemoveItem(order.Id, s);
@@ -75,7 +75,7 @@ namespace OrdersService.Tests.UnitTests
         [InlineData(" ", typeof(NotFoundError))]
         public async Task Throws_WhenOrderIsInvalid(string s, Type excType)
         {
-            var order = _orderBuilder.WithRandomId();
+            var order = _orderBuilder.WithRandomId().Build();
             try
             {
                 await _sut.RemoveItem(s, order.Items.First().ItemId);

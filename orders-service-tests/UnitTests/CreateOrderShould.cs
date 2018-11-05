@@ -38,7 +38,7 @@ namespace OrdersService.Tests.UnitTests
         [InlineData(" ")]
         public async Task Throws_WhenReferenceIsInvalid(string s)
         {
-            var order = _orderBuilder.WithDefaultValues();
+            var order = _orderBuilder.Build();
             (await _sut.Create(s, order.UserId, order.Items)).Should().Throws<ApplicationError>();    
         }
 
@@ -48,7 +48,7 @@ namespace OrdersService.Tests.UnitTests
         [InlineData(" ")]
         public async Task Throws_WhenUserIdIsInvalid(string s)
         {
-            var order = _orderBuilder.WithDefaultValues();
+            var order = _orderBuilder.Build();
             (await _sut.Create(order.Reference, null, order.Items)).Should().Throws<ApplicationError>();
         }
         

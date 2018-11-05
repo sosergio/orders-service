@@ -17,6 +17,10 @@ namespace OrdersService.Tests.FunctionalTests
         {
             _server = new TestServer(new WebHostBuilder()
                 .UseStartup<Startup>()
+                .UseSetting("ConnectionString", "fake")
+                .UseSetting("ConnectionString", "fake")
+                .UseSetting("ConnectionString", "fake")
+                .UseSetting("ConnectionString", "fake")
                 .UseEnvironment("Development"));
             _client = _server.CreateClient();
         }
