@@ -1,15 +1,52 @@
-﻿orders.api:
-    image: orders.api       
+﻿version: '3.4'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "15672:15672"
+    container_name: rabbitmq
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+
+  ordering.api:
+    image: orders.api:${TAG:-latest}
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=mongodb://mongodb:27017
+      - DatabaseName=orders-db
+      - MessageBusConnection=rabbitmq
+      - MessageBusUserName=guest
+      - MessageBusPassword=guest      
+    ports:
+      - "9001:80"   # The API Gateway redirects and access through the internal p
     build:
-      context: ./orders-service/
-      dockerfile: Dockerfile
-    ports: 
-    - "8081:80"
-    volumes: 
-      - ./orders-service/bin/pub/:/app
-    container_name: orders.api
-rabbitmq:
-  image: rabbitmq:3-management
-  ports:
-    - "15672:15672"
-  container_name: rabbitmq
+      context: .
+      dockerfile: orders-service-web-api/Dockerfile    
+    depends_on:
+      - mongodb
+      - rabbitmq
+
+  ordering.messagereceiver:
+    image: orders.messagereceiver:${TAG:-latest}
+    environment: 
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=mongodb://mongodb:27017
+      - DatabaseName=orders-db
+      - MessageBusConnection=rabbitmq
+      - MessageBusUserName=guest
+      - MessageBusPassword=guest 
+    ports:
+      - "5111:80"
+    build:
+      context: .
+      dockerfile: orders-service-message-receiver/Dockerfile    
+    depends_on:
+      - mongodb
+      - rabbitmq

@@ -47,10 +47,11 @@ namespace OrdersService.Infrastructure.Providers
             return Task.FromResult(document);
         }
 
-        public IQueryable<T> Search<T>(string collectionName)
+        public Task<IQueryable<T>> Search<T>(string collectionName, Expression<Func<T, bool>> predicate)
         {
             CreateCollectionIfNotExists(collectionName);
-            return _db[collectionName].Select(x => (T)x).AsQueryable<T>();
+            var r =  _db[collectionName].Select(x => (T)x).AsQueryable<T>();
+            return Task.FromResult(r);
         }
     }
 }

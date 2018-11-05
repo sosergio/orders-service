@@ -5,18 +5,19 @@ using OrdersService.Core.Models;
 using OrdersService.Core.Models.Errors;
 using OrdersService.Core.Interfaces;
 using Ardalis.GuardClauses;
+using OrdersService.Core.Services;
 
 namespace OrdersService.Core
 {
     public class OrdersService : IOrdersService
     {
         IRepository<Order> _odersRepository;
-        IMessageBusProvider _messageBus;
         ITimeProvider _timeProvider;
-        public OrdersService(IRepository<Order> orderRepository, IMessageBusProvider messageBus, ITimeProvider timeProvider)
+        IOrdersMessageBus _ordersMessageBus;
+        public OrdersService(IRepository<Order> orderRepository, IOrdersMessageBus messageBus, ITimeProvider timeProvider)
         {
             _odersRepository = orderRepository;
-            _messageBus = messageBus;
+            _ordersMessageBus = messageBus;
             _timeProvider = timeProvider;
         }
 
@@ -24,22 +25,23 @@ namespace OrdersService.Core
         {
             var order = await LoadById(orderId);
             order.AddItem(item);
-            return await _odersRepository.SaveAsync(order);
+            _ordersMessageBus.WriteOrder(order);
+            return order;
         }
 
         public async Task<Order> Cancel(string orderId)
         {
             var order = await LoadById(orderId);
             order.Cancel();
-            _messageBus.Send("write-order", order);
+            _ordersMessageBus.WriteOrder(order);
             return order;
         }
 
         public async Task<Order> Create(string reference, string userId, List<OrderItem> items)
         {
             var order = new Order(reference, userId, _timeProvider.Now(), items);
-            _messageBus.Send("write-order", order);
-            return order;
+            _ordersMessageBus.WriteOrder(order);
+            return await Task.FromResult(order);
         }
 
         public async Task<List<Order>> ListByUser(string userId)
@@ -61,14 +63,15 @@ namespace OrdersService.Core
             Guard.Against.NullOrEmpty(orderItemId, nameof(orderItemId));
             var order = await LoadById(orderId);
             order.RemoveItem(orderItemId);
-            return await _odersRepository.SaveAsync(order);
+            _ordersMessageBus.WriteOrder(order);
+            return order;
         }
 
         public async Task<Order> Submit(string orderId)
         {
             var order = await LoadById(orderId);
             order.Submit();
-            _messageBus.Send("write-order", order);
+            _ordersMessageBus.WriteOrder(order);
             return order;
         }
 

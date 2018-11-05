@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using OrdersService.Api.ApiModels;

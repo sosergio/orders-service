@@ -7,7 +7,7 @@ namespace OrdersService.Core.Interfaces
 {
     public interface IMessageBusProvider
     {
-        void Send(string channelId, object message);
-        void Receive<T>(string channelId, Func<T, Task<T>> function);
+        void ReceiveFromTopicQueue<T>(string queueName, string exchangeName, string routingKey, Func<T,Task<T>> function);
+        void SendToTopicQueue(string queueName, string exchangeName, string routingKey, object message); 
     }
 }

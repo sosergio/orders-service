@@ -1,5 +1,6 @@
 ﻿using OrdersService.Core.Interfaces;
 using OrdersService.Core.Models;
+using OrdersService.Core.Services;
 using System.Threading.Tasks;
 
 namespace OrdersService.MessageReceiver
@@ -7,13 +8,14 @@ namespace OrdersService.MessageReceiver
     public class MessageReceiver:IMessageReceiver
     {
         IRepository<Order> _ordersRepository;
-        IMessageBusProvider _messageBusProvider;
+        
+        IOrdersMessageBus _ordersMessageBus;
 
-        public MessageReceiver(IMessageBusProvider messageBusProvider, IRepository<Order> ordersRepository)
+        public MessageReceiver(IOrdersMessageBus messageBusProvider, IRepository<Order> ordersRepository)
         {
             _ordersRepository = ordersRepository;
-            _messageBusProvider = messageBusProvider;
-            _messageBusProvider.Receive<Order>("write-order", OnWriteOrder);
+            _ordersMessageBus = messageBusProvider;
+            _ordersMessageBus.ReceiveWriteOrder(OnWriteOrder);
         }
 
         public async Task<Order> OnWriteOrder(Order order)

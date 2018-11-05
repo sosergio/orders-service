@@ -19,22 +19,22 @@ namespace OrdersService.Infrastructure.Providers
             _config = config;
         }
         
-        public void Receive<T>(string channelId, Func<T,Task<T>> function)
+        public void ReceiveFromTopicQueue<T>(string queueName, string exchangeName, string routingKey, Func<T,Task<T>> function)
         {
-            var factory = new ConnectionFactory() { HostName = _config.HostName, UserName = "guest", Password = "guest" };
+            var factory = new ConnectionFactory() { HostName = _config.HostName, UserName = _config.UserName, Password = _config.Password };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare("orderEx", "topic");
-                channel.QueueDeclare(queue: channelId,
+                channel.ExchangeDeclare(exchangeName, "topic");
+                channel.QueueDeclare(queue: queueName,
                                     durable: false,
                                     exclusive: false,
                                     autoDelete: false,
                                     arguments: null);
-                channel.QueueBind(channelId, "orderEx", "orders");
+                channel.QueueBind(queueName, exchangeName, "orders");
 
                 Subscription subscription = new Subscription(channel,
-                        channelId, false);
+                        queueName, false);
                 channel.BasicQos(0, 10, false);
                 while (true)
                 {
@@ -55,25 +55,25 @@ namespace OrdersService.Infrastructure.Providers
             }
         }
 
-        public void Send(string channelId, object message)
+        public void SendToTopicQueue(string queueName, string exchangeName, string routingKey, object message)
         {
-            var factory = new ConnectionFactory() { HostName = _config.HostName, UserName = "guest", Password = "guest" };
+            var factory = new ConnectionFactory() { HostName = _config.HostName, UserName = _config.UserName, Password = _config.Password };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare("orderEx", "topic");
-                channel.QueueDeclare(queue: channelId,
+                channel.ExchangeDeclare(exchangeName, "topic");
+                channel.QueueDeclare(queue: queueName,
                                     durable: false,
                                     exclusive: false,
                                     autoDelete: false,
                                     arguments: null);
 
-                channel.QueueBind(channelId, "orderEx", "orders");
+                channel.QueueBind(queueName, exchangeName, routingKey);
                 
                 var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
-                channel.BasicPublish(exchange: "orderEx",
-                                     routingKey: "orders",
+                channel.BasicPublish(exchange: exchangeName,
+                                     routingKey: routingKey,
                                      basicProperties: null,
                                      body: body);
             }

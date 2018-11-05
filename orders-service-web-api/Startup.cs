@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections;
+using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +11,7 @@ using OrdersService.Api.Middleware;
 using OrdersService.Core;
 using OrdersService.Core.Config;
 using OrdersService.Core.Interfaces;
+using OrdersService.Core.Services;
 using OrdersService.Infrastructure.Providers;
 using OrdersService.Infrastructure.Repositories;
 using Swashbuckle.AspNetCore.Swagger;
@@ -19,18 +22,43 @@ namespace OrdersService.Api
     {
         IServiceCollection _services;
 
+        public static string ReadString(IDictionary dic, string key)
+        {
+            if (dic[key] == null)
+            {
+                throw new Exception($"{key} is missing.");
+            }
+
+            return dic[key].ToString();
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(new DbConfig() { ConnectionString = "your-connection-string"});
-            services.AddSingleton(new MessagingConfig() { HostName = "localhost" });
+            var envVars = Environment.GetEnvironmentVariables();
+            services.AddSingleton(new DbConfig() 
+            { 
+                ConnectionString = ReadString(envVars, "ConnectionString"),
+                DatabaseName = ReadString(envVars, "DatabaseName")
+            });
+            services.AddSingleton(new MessagingConfig()
+            {
+                HostName = ReadString(envVars, "MessageBusConnection"),
+                UserName = ReadString(envVars, "MessageBusUserName"),
+                Password = ReadString(envVars, "MessageBusPassword")
+            });
+
+            Console.WriteLine($"RabbitMq HostName: {ReadString(envVars, "MessageBusConnection")}");
+            Console.WriteLine($"Db ConnectionString: {ReadString(envVars, "ConnectionString")}");
+
             services.AddSingleton(BuildMapper());
             services.AddTransient<IRepository<Core.Models.Order>, OrdersRepository>();
             services.AddTransient<IOrdersService, Core.OrdersService>();
-            services.AddTransient<IDbProvider, InMemoryDbProvider>();
+            services.AddTransient<IDbProvider, MongoDbProvider>();
             services.AddTransient<IMessageBusProvider, RabbitMqProvider>();
             services.AddTransient<ITimeProvider, UtcTimeProvider>();
+            services.AddTransient<IOrdersMessageBus, OrdersMessageBus>();
 
             services.AddMvc().AddJsonOptions(options =>
             {
@@ -91,12 +119,12 @@ namespace OrdersService.Api
                 app.UseDeveloperExceptionPage();
                 ListAllRegisteredServices(app);
             }
-            
+
             app.UseMiddleware<JsonExceptionMiddleware>();
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "The Orders Service Api | v1"));
-            
+
         }
     }
 }

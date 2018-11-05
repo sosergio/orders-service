@@ -38,13 +38,14 @@ namespace OrdersService.Infrastructure.Repositories
 
         public async Task<IEnumerable<Order>> Search(Expression<Func<Order, bool>> predicate)
         {
-            return await Task.FromResult(_dbProvider.Search<Order>(CollectionId).Where(predicate));
+            var f = await _dbProvider.Search<Order>(CollectionId, predicate);
+            return f.ToList();
         }
 
         public async Task<Order> LoadById(string itemId)
         {
             Guard.Against.NullOrEmpty(itemId, nameof(itemId));
-            return await Task.FromResult(_dbProvider.Search<Order>(CollectionId).SingleOrDefault(x => x.Id == itemId));
+            return (await _dbProvider.Search<Order>(CollectionId, x => x.Id == itemId)).SingleOrDefault();
         }
     }
 }

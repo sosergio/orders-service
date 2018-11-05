@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDbGenericRepository.Models;
+using Newtonsoft.Json;
 using OrdersService.Core.DataModels;
 using System;
 using System.Collections.Generic;
@@ -7,8 +9,9 @@ using System.Text;
 
 namespace OrdersService.Core.Models
 {
-    public class Order : IDbEntity
+    public class Order : IDbEntity, IDocument<string>
     {
+        [BsonId]
         [JsonProperty("id")]
         public string Id { get; set; }
         [JsonProperty("reference")]
@@ -21,8 +24,8 @@ namespace OrdersService.Core.Models
         public List<OrderItem> Items { get; set; }
         [JsonProperty("status")]
         public OrderStatus Status { get; private set; }
+        public int Version {get;set; }
         
-    
         public Order(string reference, string userId, DateTimeOffset date, List<OrderItem> items)
         {
             Reference = reference;
@@ -39,7 +42,7 @@ namespace OrdersService.Core.Models
 
         public void RemoveItem(string itemId)
         {
-            var item = Items.SingleOrDefault(i => i.Id == itemId);
+            var item = Items.SingleOrDefault(i => i.ItemId == itemId);
             if (item != null) Items.Remove(item);
         }
 
