@@ -11,13 +11,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using OrdersService.Core.Models.Errors;
+using OrdersService.Core.Services;
 
 namespace OrdersService.Tests.UnitTests
 {
     public class RemoveItemShould
     {
         IRepository<Order> _ordersRepository;
-        IMessageBusProvider _queue;
+        IOrdersMessageBus _eventBus;
         IOrdersService _sut;
         ITimeProvider _timeProvider;
         IFixture _fixture;
@@ -26,9 +27,9 @@ namespace OrdersService.Tests.UnitTests
         public RemoveItemShould()
         {
             _ordersRepository = Substitute.For<IRepository<Order>>();
-            _queue = Substitute.For<IMessageBusProvider>();
+            _eventBus = Substitute.For<IOrdersMessageBus>();
             _timeProvider = Substitute.For<ITimeProvider>();
-            _sut = new OrdersService.Core.OrdersService(_ordersRepository, _queue, _timeProvider);
+            _sut = new OrdersService.Core.OrdersService(_ordersRepository, _eventBus, _timeProvider);
             _fixture = new Fixture().Customize(new AutoNSubstituteCustomization());
             _orderBuilder = new OrderBuilder();
         }
@@ -41,11 +42,11 @@ namespace OrdersService.Tests.UnitTests
             _timeProvider.Now().Returns(order.Date);
             _ordersRepository.LoadById(order.Id).Returns(order);
             var expected = order;
-            expected.RemoveItem(expected.Items.First().Id);
+            expected.RemoveItem(expected.Items.First().ItemId);
             _ordersRepository.SaveAsync(expected).Returns(expected);
 
             //Act
-            var result = await _sut.RemoveItem(order.Id, order.Items.First().Id);
+            var result = await _sut.RemoveItem(order.Id, order.Items.First().ItemId);
 
             //Assert
             result.Should().BeEquivalentTo(expected);
@@ -77,7 +78,7 @@ namespace OrdersService.Tests.UnitTests
             var order = _orderBuilder.WithRandomId();
             try
             {
-                await _sut.RemoveItem(s, order.Items.First().Id);
+                await _sut.RemoveItem(s, order.Items.First().ItemId);
             }
             catch (Exception exc)
             {

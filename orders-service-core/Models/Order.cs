@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDbGenericRepository.Models;
 using Newtonsoft.Json;
 using OrdersService.Core.DataModels;
@@ -9,7 +10,7 @@ using System.Text;
 
 namespace OrdersService.Core.Models
 {
-    public class Order : IDbEntity, IDocument<string>
+    public class Order : IDbEntity
     {
         [BsonId]
         [JsonProperty("id")]

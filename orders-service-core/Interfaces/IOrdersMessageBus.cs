@@ -8,7 +8,7 @@ namespace OrdersService.Core.Services
 {
     public interface IOrdersMessageBus
     {
-        void WriteOrder(Order order);
-        void ReceiveWriteOrder(Func<Order,Task<Order>> onReceive);
+        bool WriteOrder(Order order);
+        bool ReceiveWriteOrder(Func<Order,Task<Order>> onReceive);
     }
 }

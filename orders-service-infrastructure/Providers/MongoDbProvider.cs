@@ -43,18 +43,16 @@ namespace OrdersService.Infrastructure.Providers
         public async Task<IDbEntity> ReadDocumentAsync(string collectionName, string documentId)
         {
             var collection = CreateCollectionIfNotExists<IDbEntity>(collectionName);
-            var found = await collection.FindAsync(d => d.Id == documentId);
+            var filter = Builders<IDbEntity>.Filter.Eq("_id", documentId);
+            var found = await collection.FindAsync(filter);
             return found.FirstOrDefault();
         }
 
         public async Task<IDbEntity> ReplaceDocumentAsync(string collectionName, IDbEntity document)
         {
             var collection = CreateCollectionIfNotExists<IDbEntity>(collectionName);
-            var jsonObj = JsonConvert.SerializeObject(document);
-            JObject o = new JObject(document);
-            o.Remove("Id");
-            var noId = o.ToObject<dynamic>();
-            var found = await collection.FindOneAndReplaceAsync(d => d.Id == document.Id, noId);
+            var filter = Builders<IDbEntity>.Filter.Eq("_id", document.Id);
+            var found = await collection.FindOneAndReplaceAsync(filter, document);
             return found;
         }
 

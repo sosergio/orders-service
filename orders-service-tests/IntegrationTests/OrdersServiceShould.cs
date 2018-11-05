@@ -5,8 +5,10 @@ using NSubstitute;
 using OrdersService.Core;
 using OrdersService.Core.Interfaces;
 using OrdersService.Core.Models;
+using OrdersService.Core.Services;
 using OrdersService.Infrastructure.Providers;
 using OrdersService.Infrastructure.Repositories;
+using OrdersService.Infrastructure.Providers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +19,7 @@ namespace OrdersService.Tests.IntegrationTests
     public class OrdersServiceShould
     {
         IRepository<Core.Models.Order> _ordersRepository;
-        IMessageBusProvider _queue;
+        IOrdersMessageBus _eventBus;
         IOrdersService _sut;
         ITimeProvider _timeProvider;
         IFixture _fixture;
@@ -25,10 +27,11 @@ namespace OrdersService.Tests.IntegrationTests
         
         public OrdersServiceShould()
         {
-            _ordersRepository = new OrdersRepository(new InMemoryDbProvider());
-            _queue = Substitute.For<IMessageBusProvider>();
+            var dbConfig = new Core.Config.DbConfig(){};
+            _ordersRepository = new OrdersRepository(new InMemoryDbProvider(dbConfig));
+            _eventBus = Substitute.For<IOrdersMessageBus>();
             _timeProvider = new UtcTimeProvider();
-            _sut = new Core.OrdersService(_ordersRepository, _queue, _timeProvider);
+            _sut = new Core.OrdersService(_ordersRepository, _eventBus, _timeProvider);
             _fixture = new Fixture().Customize(new AutoNSubstituteCustomization());
             _orderBuilder = new OrderBuilder();
         }
@@ -59,7 +62,7 @@ namespace OrdersService.Tests.IntegrationTests
             var actual = await _sut.Submit(order.Id);
 
             //Assert
-            actual.Should().BeEquivalentTo(order);
+            _eventBus.Received(1).WriteOrder(Arg.Is<Order>(x => x.Id == order.Id && x.Status == order.Status));
         }
 
         [Fact]
@@ -74,7 +77,7 @@ namespace OrdersService.Tests.IntegrationTests
             var actual = await _sut.Cancel(order.Id);
 
             //Assert
-            actual.Should().BeEquivalentTo(order);
+            _eventBus.Received(1).WriteOrder(Arg.Is<Order>(x => x.Id == order.Id && x.Status == order.Status));
         }
 
         [Fact]
@@ -85,12 +88,12 @@ namespace OrdersService.Tests.IntegrationTests
             order = await _ordersRepository.SaveAsync(order);
             var item = _fixture.Create<OrderItem>();
             order.AddItem(item);
-
+            
             //Act
             var actual = await _sut.AddItem(order.Id, item);
 
             //Assert
-            actual.Should().BeEquivalentTo(order);
+            _eventBus.Received(1).WriteOrder(Arg.Is<Order>(x => x.Id == order.Id && x.Items.Count == order.Items.Count));
         }
 
         [Fact]
@@ -99,14 +102,14 @@ namespace OrdersService.Tests.IntegrationTests
             //Arrange
             var order = _orderBuilder.WithDefaultValues();
             order = await _ordersRepository.SaveAsync(order);
-            var itemId = order.Items.First().Id;
+            var itemId = order.Items.First().ItemId;
             order.RemoveItem(itemId);
 
             //Act
             var actual = await _sut.RemoveItem(order.Id, itemId);
 
             //Assert
-            actual.Should().BeEquivalentTo(order);
+            _eventBus.Received(1).WriteOrder(Arg.Is<Order>(x => x.Id == order.Id && x.Items.Count == order.Items.Count));
         }
 
         [Fact]

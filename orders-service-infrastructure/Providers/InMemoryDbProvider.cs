@@ -14,7 +14,7 @@ namespace OrdersService.Infrastructure.Providers
     {
         private static Dictionary<string, List<IDbEntity>> _db { get; set; } = new Dictionary<string, List<IDbEntity>>();
 
-        public InMemoryDbProvider()
+        public InMemoryDbProvider(DbConfig dbConfig)
         {}
 
         public void CreateCollectionIfNotExists(string collectionId)

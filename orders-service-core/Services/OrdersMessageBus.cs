@@ -17,14 +17,16 @@ namespace OrdersService.Core.Services
             _messageBus = messageBus;
         }
 
-        public void ReceiveWriteOrder(Func<Order, Task<Order>> onReceive)
+        public bool ReceiveWriteOrder(Func<Order, Task<Order>> onReceive)
         {
             _messageBus.ReceiveFromTopicQueue<Order>(WriteOrderQueueName, DefaultExchangeName, AllRoutingKey, onReceive);
+            return true;
         }
 
-        public void WriteOrder(Order order)
+        public bool WriteOrder(Order order)
         {
             _messageBus.SendToTopicQueue(WriteOrderQueueName, DefaultExchangeName, AllRoutingKey, order);
+            return true;
         }
     }
 }
