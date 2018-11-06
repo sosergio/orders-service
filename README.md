@@ -15,6 +15,7 @@ The application uses a number of open source projects to work properly:
 * [Flurl](http://flurl.io) - Fluent URL building and wrist-friendly HTTP client for .NET.
 * [Docker](http://www.docker.com) - performs operating-system-level virtualization
 * [MongoDb](http://www.mongodb.com) - cross-platform document-oriented database program
+* [XUnit](https://xunit.github.io) - unit testing tool for the .NET framework
 
 ### Installation
 
@@ -57,6 +58,15 @@ Task<Order> AddItem(AddOrderItemRequest request);
 Task<Order> RemoveItem(RemoveOrderItemRequest request);
 Task<Order> Submit(OrderRequest request);
 ```
+
+### Testing
+
+Inside OrdersService.Tests there are 3 types of tests:
+- Unit tests
+- Integration tests
+- Functional tests
+
+They can be run using dotnet command line tools ```$ dotnet test``` or the integrated test manager of Visual Studio.
 
 ### Todos
 
